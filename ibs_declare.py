@@ -1,6 +1,7 @@
 import sublime
 import sublime_plugin
 import xml.sax
+import re
 
 class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 	def __init__(self, p):
@@ -30,11 +31,13 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
 			if len(result.result())>1:
 				self.view.show_popup_menu(result.result(),  
-					lambda x: self.proc(x, result.result()))
+					lambda x: self.proc(result.result(), x))
 			elif len(result.result()) == 1:
-				self.proc(result.result()[0])
+				self.proc(result.result())
+			# else:
+			# 	self.view.set_status('error', 'can\'t find declaration')
 		
-	def proc(self, x, data):
+	def proc(self, data, x = 0):
 		print('proc...', x)
 		if x != -1:
 			self.view.window().open_file(data[x], sublime.ENCODED_POSITION)
@@ -42,19 +45,25 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 	def load_file(self):
 		if self.file == False:
 			print('open')
-			f = open("S:/IBS/prg/NSense.Lex.xml", 'rb')
-			self.file = f.read()
+			with open("S:/IBS/prg/NSense.Lex.xml", 'rb') as f:
+				self.file = f.read()
 		return self.file
 
 
 class decl_selector(xml.sax.handler.ContentHandler):
 	def __init__(self, word):
-		self.word = word
+		self.word = word.lower()
 		self.files = []
+		self.mask = re.compile(':')
 
 	def startElement(self, name, attr):
-		if(name=="details" and attr.getValue("name")==self.word):
-			self.files.append(attr.getValue("file")+":"+attr.getValue("line")+":"+attr.getValue("col"))
+		# if(name=="object"):
+		# 	if (self.word in self.mask.split(attr.getValue("name"))):
+		
+		if(name=="details"):
+			if (self.word == self.mask.split(attr.getValue("name").lower())[-1]):
+				self.files.append(attr.getValue("file")+":"+attr.getValue("line")+":"+attr.getValue("col"))
 
 	def result(self):
+		self.files.sort()
 		return self.files
