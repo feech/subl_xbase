@@ -30,14 +30,14 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
 			if len(result.result())>1:
 				self.view.show_popup_menu(result.result(),  
-					lambda x: self.proc(x))
+					lambda x: self.proc(x, result.result()))
 			elif len(result.result()) == 1:
 				self.proc(result.result()[0])
 		
-	def proc(self, x):
+	def proc(self, x, data):
 		print('proc...', x)
 		if x != -1:
-			self.view.window().open_file(x, sublime.ENCODED_POSITION)
+			self.view.window().open_file(data[x], sublime.ENCODED_POSITION)
 
 	def load_file(self):
 		if self.file == False:
