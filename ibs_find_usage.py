@@ -3,11 +3,13 @@ import sublime_plugin
 import xml.etree.ElementTree as ET
 import re
 
+FindUsageCommandXbaseCommandFile = False
+
 class FindUsageCommandXbaseCommand(sublime_plugin.TextCommand):
 	def __init__(self, p):
 		super().__init__(p)
-		self.file = False
-		print('__init__ FindUsedCommandXbaseCommand')
+		self.file = FindUsageCommandXbaseCommandFile
+		print('__init__ FindUsageCommandXbaseCommand')
 
 
 	def run(self, edit):
@@ -48,10 +50,12 @@ class FindUsageCommandXbaseCommand(sublime_plugin.TextCommand):
 
 	def load_file(self):
 		if self.file == False:
-			filename = 'C:/Users/ako/Downloads/NSense.Ref.xml'
-			# filename = 'S:/IBS/prg/NSense.Ref.xml'
+			# filename = 'C:/Users/ako/Downloads/NSense.Ref.xml'
+			filename = 'S:/IBS/prg/NSense.Ref.xml'
 			print('!!!! load file !!!!', filename)
 			with open(filename) as f:
 				buf = re.sub(r'(&#x(.){1,5};)', '', str(f.read()))
 				self.file = ET.fromstring(buf)
+				global FindUsageCommandXbaseCommandFile
+				FindUsageCommandXbaseCommandFile = self.file
 		return self.file
