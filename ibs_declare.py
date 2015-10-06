@@ -12,10 +12,6 @@ def plugin_loaded():
 
 
 
-
-
-
-
 class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 	def __init__(self, p):
 		super().__init__(p)
@@ -68,6 +64,9 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 		return self.file
 
 	def select_file(self, remote_file):
+		return GoDefinitionXbaseCommand.match_file(self.view.file_name(), remote_file)
+
+	def match_file(local_file, remote_file):
 
 		# rf = "S:\\IBS\\prg\\post\\rlake\\session\\xxx.prg:22:33"
 		# rf = "S:\\IBS\\prg\\post\\rlake\\rlSendDoc.prg:11:22"
@@ -75,23 +74,22 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 		# print("!!!!", remote_file)
 
 		rf = remote_file
-		lo = self.view.file_name()
+		lo = local_file
 
 		red, ret_p = os.path.splitdrive(rf)
 		lod, lot_p = os.path.splitdrive(lo)
-		# print('pair', lod, lot_p)
 		
 		mask = re.compile(":")
 		ret = mask.split(ret_p)
 
-		path = mm(lo, os.path.join(red,ret[0]))
+		path = GoDefinitionXbaseCommand.iterate_path(lo, os.path.join(red,ret[0]))
 		if not path:
 			return remote_file
 		result = path+":"+ret[1]+":"+ret[2]
 		print('result', result)
 		return result
 
-	def mm(self, p_local, p_remote):
+	def iterate_path(p_local, p_remote):
 		lo = p_local
 		while True:
 			lo, lot = os.path.split(lo)
