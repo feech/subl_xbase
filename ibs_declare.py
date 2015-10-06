@@ -5,6 +5,7 @@ import re
 import os
 
 GoDefinitionXbaseCommandFile = False
+GoDefinitionXbaseCommandSize = 0
 
 def plugin_loaded():
 	print('OK')
@@ -15,7 +16,6 @@ def plugin_loaded():
 class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 	def __init__(self, p):
 		super().__init__(p)
-		self.file = GoDefinitionXbaseCommandFile
 		print('__init__ GoDefinitionXbaseCommand')
 
 	def run(self, edit):
@@ -56,12 +56,15 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 			self.view.window().open_file(file, sublime.ENCODED_POSITION)
 
 	def load_file(self):
-		if self.file == False:
+		global GoDefinitionXbaseCommandFile
+		global GoDefinitionXbaseCommandSize
+		file_name = "S:/IBS/prg/NSense.Lex.xml"
+
+		if GoDefinitionXbaseCommandFile == False or GoDefinitionXbaseCommandSize != os.path.getsize(file_name):
 			print('!!!! load file !!!!')
-			self.file = ET.parse("S:/IBS/prg/NSense.Lex.xml")
-			global GoDefinitionXbaseCommandFile
-			GoDefinitionXbaseCommandFile = self.file
-		return self.file
+			GoDefinitionXbaseCommandFile = ET.parse(file_name)
+			GoDefinitionXbaseCommandSize = os.path.getsize(file_name)
+		return GoDefinitionXbaseCommandFile
 
 	def select_file(self, remote_file):
 		return GoDefinitionXbaseCommand.match_file(self.view.file_name(), remote_file)

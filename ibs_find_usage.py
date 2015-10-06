@@ -5,13 +5,12 @@ import re
 import os
 
 FindUsageCommandXbaseCommandFile = False
+FindUsageCommandXbaseCommandSize = 0
 
 class FindUsageCommandXbaseCommand(sublime_plugin.TextCommand):
 	def __init__(self, p):
 		super().__init__(p)
-		self.file = FindUsageCommandXbaseCommandFile
 		print('__init__ FindUsageCommandXbaseCommand')
-
 
 	def run(self, edit):
 		self.view.run_command('single_selection')
@@ -51,16 +50,17 @@ class FindUsageCommandXbaseCommand(sublime_plugin.TextCommand):
 
 
 	def load_file(self):
-		if self.file == False:
+		global FindUsageCommandXbaseCommandFile
+		global FindUsageCommandXbaseCommandSize
+		file_name = 'S:/IBS/prg/NSense.Ref.xml'
+		if FindUsageCommandXbaseCommandFile == False or FindUsageCommandXbaseCommandSize != os.path.getsize(file_name):
 			# filename = 'C:/Users/ako/Downloads/NSense.Ref.xml'
-			filename = 'S:/IBS/prg/NSense.Ref.xml'
-			print('!!!! load file !!!!', filename)
-			with open(filename) as f:
+			print('!!!! load file !!!!', file_name)
+			with open(file_name) as f:
 				buf = re.sub(r'(&#x(.){1,5};)', '', str(f.read()))
-				self.file = ET.fromstring(buf)
-				global FindUsageCommandXbaseCommandFile
-				FindUsageCommandXbaseCommandFile = self.file
-		return self.file
+				FindUsageCommandXbaseCommandFile = ET.fromstring(buf)
+				FindUsageCommandXbaseCommandSize = os.path.getsize(file_name)
+		return FindUsageCommandXbaseCommandFile
 
 	def select_file(self, remote_file):
 		return FindUsageCommandXbaseCommand.match_file(self.view.file_name(), remote_file)
