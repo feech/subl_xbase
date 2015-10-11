@@ -21,13 +21,10 @@ class IbsLoader(threading.Thread):
  
     def run(self):
         try:
-            print("run start")
             self.file = ET.parse(self.file_name)
             self.file_size = os.path.getsize(self.file_name)
             self.result = True
-            print("run finish")
         except Exception:
-            print("run except")
             self.result = False
 
 
@@ -53,8 +50,6 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
             self.loading(word)
 
-    # def loading_file():
-
     def loading(self, word):
         if self.loader == None:
             file_name = "S:/IBS/prg/NSense.Lex.xml"
@@ -62,6 +57,7 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
                 self.loader = IbsLoader(file_name)
                 self.loader.start()
                 sublime.set_timeout(lambda: self.loading(word), 100)
+                self.view.set_status('load', 'Lex loading...')
             else:
                 self.find_lines(word)
         else:
@@ -73,6 +69,7 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
                     self.find_lines(word)
                 else:
                     print('file not load')
+                self.view.erase_status('load')
                 self.loader = None
 
 
@@ -98,10 +95,9 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
         #   self.view.set_status('error', 'can\'t find declaration')
         
     def proc(self, data, x = 0):
-        print('proc...', x)
         if x != -1:
             file = self.select_file(data[x])
-            print(">>>>", file)
+            print(data[x], ">>>>", file)
             self.view.window().open_file(file, sublime.ENCODED_POSITION)
 
     def assign_new_file(self, file, size):
@@ -133,7 +129,6 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
         if not path:
             return remote_file
         result = path+":"+ret[1]+":"+ret[2]
-        print('result', result)
         return result
 
     # подбирает локальный файл по имени похожий на файл из репозитория
