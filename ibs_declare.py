@@ -33,6 +33,7 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
         super().__init__(p)
         print('__init__ GoDefinitionXbaseCommand')
         self.loader = None
+        self.loading_progress = 0
 
     def run(self, edit):
 
@@ -50,6 +51,11 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
             self.loading(word)
 
+    def next_loading_char(self):
+        seq = '|/-\\'
+        self.loading_progress = (self.loading_progress+1) % len(seq)
+        return seq[self.loading_progress]
+
     def loading(self, word):
         if self.loader == None:
             file_name = "S:/IBS/prg/NSense.Lex.xml"
@@ -62,6 +68,7 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
                 self.find_lines(word)
         else:
             if self.loader.is_alive():
+                self.view.set_status('load', 'Lex loading...'+self.next_loading_char())
                 sublime.set_timeout(lambda: self.loading(word), 100)
             else:
                 if self.loader.result == True:
