@@ -40,9 +40,25 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
         self.view.run_command('single_selection')
         self.view.run_command('expand_selection', {'to': 'word'})
+
+        # open header.ch
+        line = None
+        for s in reversed(self.view.sel()):
+            line = self.view.substr(self.view.line(s))
+
+        if re.match('#include.*\.ch', line):
+            header = re.search(r"(\w+)\.ch", line)
+            if header:
+                fn = self.get_fullname_ch(header.group(0))
+                print([fn])
+                self.proc([fn])
+                # open_header(header.group(0))
+                return
         
+        # looking for a word
         word = None
         for s in reversed(self.view.sel()):
+            print(self.view.substr(self.view.line(s)))
             word = self.view.substr(s)
          
         if word:
@@ -191,6 +207,9 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
         return p_remote
 
+    def get_fullname_ch(self, file_name):
+        return "S:/IBS/prg/ch/"+file_name
+
     def get_filename_m(self):
         if self.mode == 'decl':
             return "S:/IBS/prg/NSense.Lex.xml"
@@ -229,7 +248,7 @@ class GoDefinitionXbaseCommand(sublime_plugin.TextCommand):
 
     def is_need_to_load(self):
         if self.mode == 'decl':
-            return self.get_file_m() == None or self.get_file_size_m() != os.path.getsize(file_name)
+            return self.get_file_m() == None or self.get_file_size_m() != os.path.getsize(self.get_filename_m())
         if self.mode == 'usage':
             return self.get_file_m() == None
         if self.mode == 'load':
